@@ -1,0 +1,22 @@
+
+# navigate to caviar directory
+cd /zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/caviar/
+
+# function to run caviar commands, 1=rsq text (testing 300 blocks since it is larger than the number of blocks in either rsq threshold)
+run_all_caviar_for_parameter () {
+	for BLOCK in $(seq 1 $2); do
+		echo "block $BLOCK"
+		R_MATRIX="r_matrix_rsq_$1_block_$BLOCK.txt"
+		Z_FILE="z_file_rsq_$1_block_$BLOCK.txt"
+		OUT_NAME="caviar_out_rsq_$1_block_$BLOCK"
+		if [[ -f $R_MATRIX && -f $Z_FILE ]]; then
+			echo "files exist for block, running caviar:"
+			CAVIAR -o $OUT_NAME -l $R_MATRIX -z $Z_FILE -c 1
+		else
+			echo "no files in block"
+		fi	done
+}
+
+# run caviar commands for rsq thresholds 0.2 and 0.4
+run_all_caviar_for_parameter 04 204
+run_all_caviar_for_parameter 02 168
