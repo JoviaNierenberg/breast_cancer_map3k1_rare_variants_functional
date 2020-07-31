@@ -9,7 +9,7 @@ run_all_caviar_for_parameter () {
 		R_MATRIX="r_matrix_rsq_$1_block_$BLOCK.txt"
 		Z_FILE="z_file_rsq_$1_block_$BLOCK.txt"
 		OUT_NAME="caviar_out_rsq_$1_block_$BLOCK"
-		OUT_NAME_MULT="caviar_mult_causal_out_rsq_$1_block_$BLOCK"
+		OUT_NAME_MULT="caviar_out_mult_causal_rsq_$1_block_$BLOCK"
 		if [[ -f $R_MATRIX && -f $Z_FILE ]]; then
 			echo "files exist for block, running caviar:"
 			CAVIAR -o $OUT_NAME -l $R_MATRIX -z $Z_FILE -c 1

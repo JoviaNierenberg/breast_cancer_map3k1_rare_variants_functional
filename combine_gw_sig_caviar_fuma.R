@@ -5,7 +5,7 @@ library(stringr)
 
 # read files
 results_map3k1 = fread("/zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/independent_variants/map3k1_gwsig_with_hap_blocks.csv")
-caviar_posteriors = list.files(path = "/zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/caviar/", pattern = "caviar_out_rsq_") %>%
+caviar_posteriors = list.files(path = "/zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/caviar/", pattern = "caviar_out_") %>%
   str_subset(., "post")
 all_enhancers = fread("/zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/fuma/BCAC_MAP3K1_All_GW_Sig_All_Enhancers_2020_07_28/ciSNPs.txt") %>%
   mutate(enh_present = 1) %>%
@@ -18,15 +18,15 @@ all_enhancers = fread("/zivlab/data3/jnierenberg/Data/rare_variant_functional_ma
   select(chr, position_b37=pos, reg_region, type, breast_enh, num_enh, everything())
 
 # function to read and row bind all caviar posteriors for an rsq threshold
-combine_caviar_posts = function(rsq_threshold){
-  post_vect = str_subset(caviar_posteriors, paste0("_", rsq_threshold, "_"))
+combine_caviar_posts = function(rsq_threshold, mult_causal_string=""){
+  post_vect = str_subset(caviar_posteriors, paste0("out_", mult_causal_string, "rsq_", rsq_threshold, "_"))
   post_list = list()
   # read caviar results for all files named in post_vect
   for (i in seq_along(post_vect)) {
     post_list[[i]] = fread(post_vect[i])
   }
   # create one file with all posteriors
-  post_col = paste0("caviar_posts_rsq_", rsq_threshold)
+  post_col = paste0("caviar_posts_", mult_causal_string, "rsq_", rsq_threshold)
   all_posts = bind_rows(post_list) %>% select(snp_id=SNP_ID, !!post_col:=`Causal_Post._Prob.`)
   print(dim(all_posts))
   return(all_posts)
@@ -37,6 +37,8 @@ setwd("/zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/caviar/")
 map3k1_caviar_fuma = results_map3k1 %>% 
   left_join(combine_caviar_posts("02")) %>% 
   left_join(combine_caviar_posts("04")) %>%
+  left_join(combine_caviar_posts("02", "mult_causal_")) %>%
+  left_join(combine_caviar_posts("04", "mult_causal_")) %>%
   left_join(all_enhancers) 
 
 # write file
