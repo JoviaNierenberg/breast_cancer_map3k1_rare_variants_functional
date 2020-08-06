@@ -13,7 +13,7 @@ for (i in 1:length(files)) {
 files_concatenated = bind_rows(list_of_read_files)
 
 # create MAF bins
-maf_bins = files_concatenated %>% mutate(maf_bins = ifelse(MAF<0.0004, "singleton",
+maf_bins = files_concatenated %>% distinct() %>% mutate(maf_bins = ifelse(MAF<0.0004, "singleton",
                                                            ifelse(MAF<0.005, ">singleton but <0.005", 
                                                                   ifelse(MAF<0.01, ">=0.005-0.01",
                                                                          ifelse(MAF<0.05, ">=0.01-0.05", 
