@@ -4,7 +4,7 @@ library(epiDisplay)
 
 # read and concatenate files with topmed variants for each region
 setwd("/zivlab/data3/shuntsman/jovia/")
-files = list.files()
+files = setdiff(list.files(), list.dirs(recursive = FALSE, full.names = FALSE)) # list files that are not directories
 list_of_read_files = list()
 for (i in 1:length(files)) {
   curr_file = fread(files[i])
