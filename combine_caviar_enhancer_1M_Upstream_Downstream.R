@@ -63,7 +63,7 @@ map3k1_caviar_scored = map3k1_caviar %>%
          sum_caviar_2 = ifelse((is.na(sum_caviar_2) & !is.na(rsq_02)), 0.2, sum_caviar_2),
          sum_caviar = sum_caviar_4 + sum_caviar_2) %>%
   rowwise() %>%
-  mutate(priority_score = sum(200*mcf7_enhancer, 200*sum_caviar, *minus_log10_p, na.rm = TRUE)) %>%
+  mutate(priority_score = sum(200*mcf7_enhancer, 200*sum_caviar, minus_log10_p, na.rm = TRUE)) %>%
   as.data.frame() %>%
   mutate(priority_percentile = percent_rank(priority_score)) %>%
   arrange(desc(priority_score))
