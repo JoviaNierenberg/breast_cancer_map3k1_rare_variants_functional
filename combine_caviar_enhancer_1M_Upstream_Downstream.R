@@ -55,19 +55,21 @@ map3k1_caviar = results_map3k1 %>%
 
 head(map3k1_caviar)
 
-# Calculate priority scores
-map3k1_caviar_scored = map3k1_caviar %>% 
-  mutate(sum_caviar_4 = caviar_posts_rsq_04 + caviar_posts_mult_causal_rsq_04,
-         sum_caviar_2 = caviar_posts_rsq_02 + caviar_posts_mult_causal_rsq_02,
-         sum_caviar_4 = ifelse((is.na(sum_caviar_4) & !is.na(rsq_04)), 0.2, sum_caviar_4),
-         sum_caviar_2 = ifelse((is.na(sum_caviar_2) & !is.na(rsq_02)), 0.2, sum_caviar_2),
-         sum_caviar = sum_caviar_4 + sum_caviar_2) %>%
-  rowwise() %>%
-  mutate(priority_score = sum(200*mcf7_enhancer, 200*sum_caviar, minus_log10_p, na.rm = TRUE)) %>%
-  as.data.frame() %>%
-  mutate(priority_percentile = percent_rank(priority_score)) %>%
-  arrange(desc(priority_score))
-head(map3k1_caviar_scored)
+# Determine priority
+map3k1_caviar_prioritized = map3k1_caviar %>% 
+  mutate(avg_caviar = rowMeans(select(., caviar_posts_rsq_04, caviar_posts_mult_causal_rsq_04, 
+                                      caviar_posts_rsq_02, caviar_posts_mult_causal_rsq_02), na.rm = TRUE),
+         avg_caviar = ifelse((is.na(avg_caviar) & (!is.na(rsq_04) | !is.na(rsq_02))), 0.051, 
+                             ifelse(is.na(avg_caviar), 0, avg_caviar)),
+         priority = ifelse(mcf7_enhancer & avg_caviar>0.05, 1, 
+                           ifelse(mcf7_enhancer & avg_caviar>0, 2, 
+                                  ifelse(avg_caviar>0.05, 3, 
+                                         ifelse(avg_caviar>0, 4, 
+                                                ifelse(minus_log10_p>-log10(5e-8), 5, 
+                                                       ifelse(mcf7_enhancer, 6, NA))))))) %>%
+  arrange(priority)
+head(map3k1_caviar_prioritized)
+table(map3k1_caviar_prioritized$priority)
 
 # Write file
-fwrite(map3k1_caviar_scored, file = "/zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/map3k1_gw_sig_caviar_enhancers_scored.csv")
+fwrite(map3k1_caviar_prioritized, file = "/zivlab/data3/jnierenberg/Data/rare_variant_functional_map3k1/map3k1_gw_sig_caviar_enhancers_prioritized.csv")
